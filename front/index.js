@@ -55,9 +55,13 @@ document.getElementById('monitor-button').addEventListener('click', function (e)
         }
     }
 
-    // 发送请求
-    sendMonitorRequest(blacklist);
+    // 将黑名单数据存储到本地存储
+    localStorage.setItem('blacklist', JSON.stringify(blacklist));
+
+    // 打开新的页面
+    window.open('history.html', '_blank');
 });
+
 
 
 function sendMonitorRequest(blacklist) {
