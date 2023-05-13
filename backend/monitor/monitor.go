@@ -12,12 +12,15 @@ import (
 // BrowserHistoryRecord is a struct to hold a browser history record
 type BrowserHistoryRecord struct {
 	URL           string `json:"url"`
+	Title         string `json:"title"`
+	VisitCount    int    `json:"visit_count"`
+	LastVisitTime int64  `json:"last_visit_time"`
 	IsInBlacklist bool   `json:"isInBlacklist"`
 }
 
 func BrowserHistory(blacklist []string) ([]BrowserHistoryRecord, error) {
 	// Get the browser history
-	history, err := getBrowserHistory()
+	histories, err := getBrowserHistory()
 	if err != nil {
 		return nil, err
 	}
@@ -30,23 +33,20 @@ func BrowserHistory(blacklist []string) ([]BrowserHistoryRecord, error) {
 
 	// Check each browser record against the blacklist
 	var records []BrowserHistoryRecord
-	for _, url := range history {
-		record := BrowserHistoryRecord{
-			URL: url,
-		}
+	for _, history := range histories {
 
 		// If the record's URL is in the blacklist, mark it as such
-		if _, ok := blacklistMap[url]; ok {
-			record.IsInBlacklist = true
+		if _, ok := blacklistMap[history.URL]; ok {
+			history.IsInBlacklist = true
+		} else {
+			history.IsInBlacklist = false
 		}
-
-		records = append(records, record)
+		records = append(records, history)
 	}
-
 	return records, nil
 }
 
-func getBrowserHistory() ([]string, error) {
+func getBrowserHistory() ([]BrowserHistoryRecord, error) {
 	usr, err := user.Current()
 	if err != nil {
 		return nil, fmt.Errorf("cannot get current user: %w", err)
@@ -65,23 +65,23 @@ func getBrowserHistory() ([]string, error) {
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT url FROM urls")
+	rows, err := db.Query("SELECT url, title, visit_count, last_visit_time FROM urls")
 	if err != nil {
 		return nil, fmt.Errorf("cannot query database: %w", err)
 	}
 	defer rows.Close()
 
-	var urls []string
+	var records []BrowserHistoryRecord
 	for rows.Next() {
-		var url string
-		if err := rows.Scan(&url); err != nil {
+		var record BrowserHistoryRecord
+		if err := rows.Scan(&record.URL, &record.Title, &record.VisitCount, &record.LastVisitTime); err != nil {
 			return nil, fmt.Errorf("cannot scan row: %w", err)
 		}
-		urls = append(urls, url)
+		records = append(records, record)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("rows error: %w", err)
 	}
 
-	return urls, nil
+	return records, nil
 }

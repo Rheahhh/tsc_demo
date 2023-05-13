@@ -1,4 +1,4 @@
-let blacklistCounter = 1;
+let blacklistCounter = 0;
 
 document.querySelector('.add-button').addEventListener('click', function(e) {
     e.preventDefault();
@@ -55,14 +55,20 @@ document.getElementById('monitor-button').addEventListener('click', function (e)
         }
     }
 
-    // 将黑名单数据存储到本地存储
-    localStorage.setItem('blacklist', JSON.stringify(blacklist));
+    // 发送请求
+    sendMonitorRequest(blacklist);
 
-    // 打开新的页面
-    window.open('history.html', '_blank');
+    // 隐藏表单并显示浏览器历史
+    document.getElementById('blacklist-div').style.display = 'none';
+    document.getElementById('homepage-title').style.display = 'none';
+    document.getElementById('history-div').style.display = 'block';
 });
 
-
+document.getElementById('back-button').addEventListener('click', function(e) {
+    // 显示表单并隐藏浏览器历史
+    document.getElementById('blacklist-div').style.display = 'block';
+    document.getElementById('history-div').style.display = 'none';
+});
 
 function sendMonitorRequest(blacklist) {
     // 创建请求对象
@@ -77,8 +83,49 @@ function sendMonitorRequest(blacklist) {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
             console.log('请求成功');
+            // 解析服务器返回的 JSON 数据
+            const response = JSON.parse(xhr.responseText);
+            const historyData = response.result; // 注意这里从返回的数据中提取 result 字段
+
+            // 将数据插入表格
+            const historyTable = document.getElementById('history-result');
+            historyTable.innerHTML = ''; // 清空表格
+
+            for (const item of historyData) {
+                const newRow = historyTable.insertRow();
+
+                newRow.insertCell().textContent = item.title; // 添加 title 列
+                newRow.insertCell().textContent = item.url; // 添加 url 列
+                newRow.insertCell().textContent = item.visit_count; // 添加 visit_count 列
+                newRow.insertCell().textContent = convertTime(item.last_visit_time); // 添加 last_visit_time 列
+
+                // 添加 isInBlacklist 列
+                const blacklistCell = newRow.insertCell();
+                blacklistCell.textContent = item.isInBlacklist ? '是' : '否';
+
+                // 如果 URL 在黑名单中，改变行的背景色
+                if (item.isInBlacklist) {
+                    newRow.style.backgroundColor = 'red';
+                }
+            }
+
+            // 隐藏黑名单表单并显示浏览历史
+            document.getElementById('blacklist-div').style.display = 'none';
+            document.getElementById('homepage-title').style.display = 'none';
+            document.getElementById('history-div').style.display = 'block';
         } else if (xhr.readyState === 4) {
             console.log('请求失败');
         }
     };
+}
+
+
+
+// 实现 convertTime 函数，将微秒时间戳转换为易读的日期时间格式
+function convertTime(microseconds) {
+    // Edge 浏览器的时间戳是以微秒为单位的，从 1601 年 1 月 1 日开始
+    // 我们需要将这个时间戳转换为以毫秒为单位的，从 1970 年 1 月 1 日开始
+    const timestamp = (microseconds - 11644473600000000) / 1000;
+    const date = new Date(timestamp);
+    return date.toLocaleString(); // 返回本地格式的日期时间字符串
 }
