@@ -7,20 +7,59 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"tsc_demo/backend/common"
 )
 
-// BrowserHistoryRecord is a struct to hold a browser history record
-type BrowserHistoryRecord struct {
-	URL           string `json:"url"`
-	Title         string `json:"title"`
-	VisitCount    int    `json:"visit_count"`
-	LastVisitTime int64  `json:"last_visit_time"`
-	IsInBlacklist bool   `json:"isInBlacklist"`
+// defaultBrowserHistoryGetter is the default BrowserHistoryGetter
+var defaultBrowserHistoryGetter BrowserHistoryGetter
+
+// defaultRawHistoryGetter is the default RawHistoryGetter
+var defaultRawHistoryGetter RawHistoryGetter
+
+// BrowserHistoryGetter interface
+type BrowserHistoryGetter interface {
+	BrowserHistory(blacklist []string) ([]common.BrowserHistoryRecord, error)
 }
 
-func BrowserHistory(blacklist []string) ([]BrowserHistoryRecord, error) {
+// RawHistoryGetter interface
+type RawHistoryGetter interface {
+	GetBrowserHistory() ([]common.BrowserHistoryRecord, error)
+}
+
+// SetBrowserHistoryGetter sets the default BrowserHistoryGetter
+func SetBrowserHistoryGetter(getter BrowserHistoryGetter) {
+	defaultBrowserHistoryGetter = getter
+}
+
+// NewRawHistoryGetter creates a new instance of RawHistoryGetter
+func NewRawHistoryGetter() RawHistoryGetter {
+	if defaultRawHistoryGetter == nil {
+		defaultRawHistoryGetter = &rawHistoryGetterImpl{}
+	}
+	return defaultRawHistoryGetter
+}
+
+type rawHistoryGetterImpl struct{}
+
+// NewBrowserHistoryGetter creates a new instance of BrowserHistoryGetter
+func NewBrowserHistoryGetter() BrowserHistoryGetter {
+	if defaultBrowserHistoryGetter == nil {
+		defaultBrowserHistoryGetter = &browserHistoryGetterImpl{}
+	}
+	return defaultBrowserHistoryGetter
+}
+
+type browserHistoryGetterImpl struct{}
+
+// SetRawHistoryGetter sets the default RawHistoryGetter
+func SetRawHistoryGetter(getter RawHistoryGetter) {
+	defaultRawHistoryGetter = getter
+}
+
+func (b *browserHistoryGetterImpl) BrowserHistory(blacklist []string) ([]common.BrowserHistoryRecord, error) {
+	rawGetter := NewRawHistoryGetter()
 	// Get the browser history
-	histories, err := getBrowserHistory()
+	histories, err := rawGetter.GetBrowserHistory()
 	if err != nil {
 		return nil, err
 	}
@@ -32,9 +71,8 @@ func BrowserHistory(blacklist []string) ([]BrowserHistoryRecord, error) {
 	}
 
 	// Check each browser record against the blacklist
-	var records []BrowserHistoryRecord
+	var records []common.BrowserHistoryRecord
 	for _, history := range histories {
-
 		// If the record's URL is in the blacklist, mark it as such
 		if _, ok := blacklistMap[history.URL]; ok {
 			history.IsInBlacklist = true
@@ -46,13 +84,13 @@ func BrowserHistory(blacklist []string) ([]BrowserHistoryRecord, error) {
 	return records, nil
 }
 
-func getBrowserHistory() ([]BrowserHistoryRecord, error) {
+func (r *rawHistoryGetterImpl) GetBrowserHistory() ([]common.BrowserHistoryRecord, error) {
 	usr, err := user.Current()
 	if err != nil {
 		return nil, fmt.Errorf("cannot get current user: %w", err)
 	}
 
-	// Edge 浏览器历史记录数据库路径
+	// Edge browser history database path
 	historyDB := filepath.Join(usr.HomeDir, "AppData", "Local", "Microsoft", "Edge", "User Data", "Default", "History")
 
 	if _, err := os.Stat(historyDB); os.IsNotExist(err) {
@@ -71,9 +109,9 @@ func getBrowserHistory() ([]BrowserHistoryRecord, error) {
 	}
 	defer rows.Close()
 
-	var records []BrowserHistoryRecord
+	var records []common.BrowserHistoryRecord
 	for rows.Next() {
-		var record BrowserHistoryRecord
+		var record common.BrowserHistoryRecord
 		if err := rows.Scan(&record.URL, &record.Title, &record.VisitCount, &record.LastVisitTime); err != nil {
 			return nil, fmt.Errorf("cannot scan row: %w", err)
 		}

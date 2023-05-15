@@ -1,6 +1,6 @@
-let blacklistCounter = 0;
+let blacklistCounter = 1;
 
-document.querySelector('.add-button').addEventListener('click', function(e) {
+document.getElementById('add-button-0').addEventListener('click', function(e) {
     e.preventDefault();
 
     // Find the form
@@ -8,7 +8,7 @@ document.querySelector('.add-button').addEventListener('click', function(e) {
 
     // Create the new div
     var newDiv = document.createElement('div');
-    newDiv.id = 'blacklist-' + blacklistCounter;
+    newDiv.id = 'blacklist-group-' + blacklistCounter;
     newDiv.className = 'input-group';
 
     // Create the new label
@@ -26,6 +26,7 @@ document.querySelector('.add-button').addEventListener('click', function(e) {
     // Create the new button
     var newButton = document.createElement('button');
     newButton.textContent = '删除';
+    newButton.id = 'add-button-' + blacklistCounter;
     newButton.addEventListener('click', function(e) {
         e.preventDefault();
         newDiv.remove();
@@ -41,6 +42,13 @@ document.querySelector('.add-button').addEventListener('click', function(e) {
 
     // Increment the counter
     blacklistCounter++;
+});
+
+document.getElementById('back-button').addEventListener('click', function(e) {
+    // 显示表单并隐藏浏览器历史
+    document.getElementById('blacklist-div').style.display = 'block';
+    document.getElementById('homepage-title').style.display = 'block';
+    document.getElementById('history-div').style.display = 'none';
 });
 
 document.getElementById('monitor-button').addEventListener('click', function (e) {
@@ -64,11 +72,7 @@ document.getElementById('monitor-button').addEventListener('click', function (e)
     document.getElementById('history-div').style.display = 'block';
 });
 
-document.getElementById('back-button').addEventListener('click', function(e) {
-    // 显示表单并隐藏浏览器历史
-    document.getElementById('blacklist-div').style.display = 'block';
-    document.getElementById('history-div').style.display = 'none';
-});
+
 
 function sendMonitorRequest(blacklist) {
     // 创建请求对象
@@ -99,13 +103,14 @@ function sendMonitorRequest(blacklist) {
                 newRow.insertCell().textContent = item.visit_count; // 添加 visit_count 列
                 newRow.insertCell().textContent = convertTime(item.last_visit_time); // 添加 last_visit_time 列
 
+                // 如果 URL 在黑名单中，改变行的背景色
                 // 添加 isInBlacklist 列
                 const blacklistCell = newRow.insertCell();
-                blacklistCell.textContent = item.isInBlacklist ? '是' : '否';
+                blacklistCell.textContent = item.is_in_blacklist ? '是' : '否';
 
                 // 如果 URL 在黑名单中，改变行的背景色
-                if (item.isInBlacklist) {
-                    newRow.style.backgroundColor = 'red';
+                if (item.is_in_blacklist) {
+                    newRow.style.backgroundColor = '#F8CECC';
                 }
             }
 
@@ -118,8 +123,6 @@ function sendMonitorRequest(blacklist) {
         }
     };
 }
-
-
 
 // 实现 convertTime 函数，将微秒时间戳转换为易读的日期时间格式
 function convertTime(microseconds) {

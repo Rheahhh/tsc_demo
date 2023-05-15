@@ -3,9 +3,9 @@ body {
 }
 
 #navbar {
-    background-color: #000099;
+    background-color: #000066;
     height: 100vh;
-    width: 150px;
+    width: 120px;
     position: fixed;
     top: 0;
     left: 0;
@@ -22,7 +22,7 @@ body {
 }
 
 #topbar {
-    background-color: #000099;
+    background-color: #000066;
     height: 70px;
     width: 100%;
     position: fixed;
@@ -53,6 +53,11 @@ body {
     margin-bottom: 10px;
 }
 
+.input-group button {
+    border: none;
+    padding: 5px 10px;
+}
+
 .new-blacklist-input {
     display: flex;
     align-items: center;
@@ -69,9 +74,58 @@ body {
     margin-left: 110px;
 }
 
+
+
+#history-table {
+    width: 100%; /* 设置表格宽度为 100% */
+    table-layout: fixed; /* 设置表格布局为固定，这样列宽就会按照我们设置的来，而不会自动调整 */
+}
+
 #history-table td {
     word-break: break-word;
 }
 
+#history-table th:nth-child(1) {
+    width: 30%; /* 设置第一列的宽度为 30% */
+}
+
+#history-table th:nth-child(2) {
+    width: 40%; /* 设置第二列的宽度为 40% */
+}
+#history-table tbody td:nth-child(2) {
+    color: gray;
+}
+
+#history-table th:nth-child(3) {
+    width: 6%; /* 设置第三列的宽度为 15% */
+    text-align: center;
+}
+#history-table tbody td:nth-child(3) {
+    text-align: center;
+}
+
+#history-table th:nth-child(4) {
+    width: 15%; /* 设置第四列的宽度为 15% */
+}
+
+#history-table th:nth-child(5) {
+    width: 9%; /* 设置第四列的宽度为 15% */
+    text-align: center;
+}
+#history-table tbody td:nth-child(5) {
+    text-align: center;
+}
+
+#history-table th, #history-table td {
+    border: 1px solid #000000;
+    padding: 10px 20px;
+    text-align: left;
+}
+
+
+
+/*#history-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}*/
 
 

@@ -16,17 +16,17 @@
     <h2 id="homepage-title">主页</h2>
     <div id="blacklist-div">
         <form id="blacklist-form">
-            <div class="input-group" id="blacklist-0">
-                <label for="blacklist">黑名单:</label>
-                <input type="text" name="blacklist" id="blacklist">
-                <button class="add-button">添加</button>
+            <div class="input-group" id="blacklist-group-0">
+                <label for="blacklist-0">黑名单:</label>
+                <input type="text" name="blacklist-0" id="blacklist-0">
+                <button class="add-button" id="add-button-0">添加</button>
             </div>
             <button id="monitor-button">开始监控</button>
         </form>
     </div>
     <div id="history-div" style="display: none;">
         <button id="back-button">返回</button>
-        <h2>浏览器历史</h2>
+        <h2>浏览历史</h2>
         <table id="history-table">
             <thead>
             <tr>
@@ -34,6 +34,7 @@
                 <th>URL</th> <!-- 对应 url -->
                 <th>访问次数</th> <!-- 对应 visit_count -->
                 <th>最后访问时间</th> <!-- 对应 last_visit_time -->
+                <th>是否在黑名单中</th>
             </tr>
             </thead>
             <tbody id="history-result"></tbody>
