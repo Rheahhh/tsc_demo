@@ -24,11 +24,13 @@
             <button id="monitor-button">开始监控</button>
         </form>
     </div>
-    <div id="history-div" style="display: none;">
+    <div id="back-button-div">
         <button id="back-button">返回</button>
+    </div>
+    <div id="history-div" style="display: none;">
         <h2>浏览历史</h2>
         <table id="history-table">
-            <thead>
+            <thead style="display: none;">
             <tr>
                 <th>标题</th> <!-- 对应 title -->
                 <th>URL</th> <!-- 对应 url -->
@@ -41,6 +43,7 @@
         </table>
     </div>
 </div>
+<div id="error-message" style="display: none;"></div>
 <script src="index.js"></script>
 </body>
 </html>

@@ -45,10 +45,14 @@ document.getElementById('add-button-0').addEventListener('click', function(e) {
 });
 
 document.getElementById('back-button').addEventListener('click', function(e) {
-    // 显示表单并隐藏浏览器历史
+    // 显示表单并隐藏浏览器历史和错误消息
+
+    document.getElementById('back-button').style.display = 'none';  // Hide back button
     document.getElementById('blacklist-div').style.display = 'block';
     document.getElementById('homepage-title').style.display = 'block';
     document.getElementById('history-div').style.display = 'none';
+    document.getElementById('error-message').style.display = 'none'; // hide the error message
+
 });
 
 document.getElementById('monitor-button').addEventListener('click', function (e) {
@@ -67,6 +71,7 @@ document.getElementById('monitor-button').addEventListener('click', function (e)
     sendMonitorRequest(blacklist);
 
     // 隐藏表单并显示浏览器历史
+    document.getElementById('back-button').style.display = 'block';
     document.getElementById('blacklist-div').style.display = 'none';
     document.getElementById('homepage-title').style.display = 'none';
     document.getElementById('history-div').style.display = 'block';
@@ -95,6 +100,10 @@ function sendMonitorRequest(blacklist) {
             const historyTable = document.getElementById('history-result');
             historyTable.innerHTML = ''; // 清空表格
 
+            // 这里显示表头和表格内容
+            document.querySelector('#history-table thead').style.display = 'table-header-group';
+            document.querySelector('#history-table tbody').style.display = 'table-row-group';
+
             for (const item of historyData) {
                 const newRow = historyTable.insertRow();
 
@@ -118,8 +127,26 @@ function sendMonitorRequest(blacklist) {
             document.getElementById('blacklist-div').style.display = 'none';
             document.getElementById('homepage-title').style.display = 'none';
             document.getElementById('history-div').style.display = 'block';
+            document.getElementById('error-message').style.display = 'none';
         } else if (xhr.readyState === 4) {
             console.log('请求失败');
+
+            // 解析服务器返回的错误JSON
+            const response = JSON.parse(xhr.responseText);
+            const errorMessage = response.error; // 注意这里从返回的数据中提取 error 字段
+
+            // 将错误信息设置为错误提示<div>的文本，并将<div>显示出来
+            const errorMessageDiv = document.getElementById('error-message');
+            errorMessageDiv.textContent = errorMessage;
+            errorMessageDiv.style.display = 'block';
+
+            // 这里隐藏表头和表格内容
+            document.querySelector('#history-table thead').style.display = 'none';
+            document.querySelector('#history-table tbody').style.display = 'none';
+
+
+            document.getElementById('error-message').style.display = 'block';
+            document.getElementById('history-div').style.display = 'none';
         }
     };
 }
