@@ -1,49 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>浏览器历史监控</title>
+    <title>管理中心</title>
     <link rel="stylesheet" type="text/css" href="index.css">
 </head>
 <body>
-<div id="topbar">
-    <h3 class="title">浏览器历史监控</h3>
-</div>
-<div id="navbar">
-    <a href="#">主页</a>
-    <a href="#">告警历史</a>
-</div>
-<div id="content">
-    <h2 id="homepage-title">主页</h2>
-    <div id="blacklist-div">
-        <form id="blacklist-form">
-            <div class="input-group" id="blacklist-group-0">
-                <label for="blacklist-0">黑名单:</label>
-                <input type="text" name="blacklist-0" id="blacklist-0">
-                <button class="add-button" id="add-button-0">添加</button>
-            </div>
-            <button id="monitor-button">开始监控</button>
-        </form>
+    <nav>
+        <button id="blacklist-button">黑名单管理</button>
+        <button id="alerts-button">告警历史</button>
+    </nav>
+    <div id="blacklist" class="hidden">
+        <h2>黑名单</h2>
+        <div id="blacklist-table"></div>
+        <input id="blacklist-input" type="text" placeholder="添加新的网址">
+        <button id="add-button">添加</button>
     </div>
-    <div id="back-button-div">
-        <button id="back-button">返回</button>
+    <div id="alerts" class="hidden">
+        <h2>告警历史</h2>
+        <div class="table-row">
+            <div>Client ID</div>
+            <div>Name</div>
+            <div>URL</div>
+            <div>View Count</div>
+            <div>Visit Time</div>
+        </div>
+        <div id="alerts-table"></div>
     </div>
-    <div id="history-div" style="display: none;">
-        <h2>浏览历史</h2>
-        <table id="history-table">
-            <thead style="display: none;">
-            <tr>
-                <th>标题</th> <!-- 对应 title -->
-                <th>URL</th> <!-- 对应 url -->
-                <th>访问次数</th> <!-- 对应 visit_count -->
-                <th>最后访问时间</th> <!-- 对应 last_visit_time -->
-                <th>是否在黑名单中</th>
-            </tr>
-            </thead>
-            <tbody id="history-result"></tbody>
-        </table>
-    </div>
-</div>
-<div id="error-message" style="display: none;"></div>
-<script src="index.js"></script>
+    <script src="index.js"></script>
 </body>
 </html>

@@ -1,161 +1,100 @@
-let blacklistCounter = 1;
-
-document.getElementById('add-button-0').addEventListener('click', function(e) {
-    e.preventDefault();
-
-    // Find the form
-    var form = document.getElementById('blacklist-form');
-
-    // Create the new div
-    var newDiv = document.createElement('div');
-    newDiv.id = 'blacklist-group-' + blacklistCounter;
-    newDiv.className = 'input-group';
-
-    // Create the new label
-    var newLabel = document.createElement('label');
-    newLabel.htmlFor = 'blacklist-' + blacklistCounter;
-    newLabel.textContent = '黑名单:';
-
-    // Create the new input box
-    var newInput = document.createElement('input');
-    newInput.type = 'text';
-    newInput.name = 'blacklist-' + blacklistCounter;
-    newInput.id = 'blacklist-' + blacklistCounter;
-    newInput.className = 'new-blacklist-input';
-
-    // Create the new button
-    var newButton = document.createElement('button');
-    newButton.textContent = '删除';
-    newButton.id = 'add-button-' + blacklistCounter;
-    newButton.addEventListener('click', function(e) {
-        e.preventDefault();
-        newDiv.remove();
-    });
-
-    // Add the elements to the new div
-    newDiv.appendChild(newLabel);
-    newDiv.appendChild(newInput);
-    newDiv.appendChild(newButton);
-
-    // Add the new div to the form
-    form.insertBefore(newDiv, document.getElementById('monitor-button'));
-
-    // Increment the counter
-    blacklistCounter++;
+// 切换显示页面
+document.getElementById('blacklist-button').addEventListener('click', function() {
+    document.getElementById('blacklist').classList.remove('hidden');
+    document.getElementById('alerts').classList.add('hidden');
+    fetchBlacklist();
+});
+document.getElementById('alerts-button').addEventListener('click', function() {
+    document.getElementById('alerts').classList.remove('hidden');
+    document.getElementById('blacklist').classList.add('hidden');
+    fetchAlerts();
 });
 
-document.getElementById('back-button').addEventListener('click', function(e) {
-    // 显示表单并隐藏浏览器历史和错误消息
-
-    document.getElementById('back-button').style.display = 'none';  // Hide back button
-    document.getElementById('blacklist-div').style.display = 'block';
-    document.getElementById('homepage-title').style.display = 'block';
-    document.getElementById('history-div').style.display = 'none';
-    document.getElementById('error-message').style.display = 'none'; // hide the error message
-
-});
-
-document.getElementById('monitor-button').addEventListener('click', function (e) {
-    e.preventDefault();
-
-    // 收集所有黑名单输入框中的数据
-    const blacklist = [];
-    for (let i = 0; i < blacklistCounter; i++) {
-        const input = document.getElementById('blacklist-' + i);
-        if (input && input.value) {
-            blacklist.push(input.value);
-        }
+// 添加新的黑名单项
+document.getElementById('add-button').addEventListener('click', function() {
+    var url = document.getElementById('blacklist-input').value;
+    if (url) {
+        manageBlacklist('add', url);
     }
-
-    // 发送请求
-    sendMonitorRequest(blacklist);
-
-    // 隐藏表单并显示浏览器历史
-    document.getElementById('back-button').style.display = 'block';
-    document.getElementById('blacklist-div').style.display = 'none';
-    document.getElementById('homepage-title').style.display = 'none';
-    document.getElementById('history-div').style.display = 'block';
 });
 
-
-
-function sendMonitorRequest(blacklist) {
-    // 创建请求对象
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', 'http://localhost:8080/monitor', true);
-    xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-
-    // 发送请求
-    xhr.send(JSON.stringify({ blacklist: blacklist }));
-
-    // 监听响应
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            console.log('请求成功');
-            // 解析服务器返回的 JSON 数据
-            const response = JSON.parse(xhr.responseText);
-            const historyData = response.result; // 注意这里从返回的数据中提取 result 字段
-
-            // 将数据插入表格
-            const historyTable = document.getElementById('history-result');
-            historyTable.innerHTML = ''; // 清空表格
-
-            // 这里显示表头和表格内容
-            document.querySelector('#history-table thead').style.display = 'table-header-group';
-            document.querySelector('#history-table tbody').style.display = 'table-row-group';
-
-            for (const item of historyData) {
-                const newRow = historyTable.insertRow();
-
-                newRow.insertCell().textContent = item.title; // 添加 title 列
-                newRow.insertCell().textContent = item.url; // 添加 url 列
-                newRow.insertCell().textContent = item.visit_count; // 添加 visit_count 列
-                newRow.insertCell().textContent = convertTime(item.last_visit_time); // 添加 last_visit_time 列
-
-                // 如果 URL 在黑名单中，改变行的背景色
-                // 添加 isInBlacklist 列
-                const blacklistCell = newRow.insertCell();
-                blacklistCell.textContent = item.is_in_blacklist ? '是' : '否';
-
-                // 如果 URL 在黑名单中，改变行的背景色
-                if (item.is_in_blacklist) {
-                    newRow.style.backgroundColor = '#F8CECC';
-                }
-            }
-
-            // 隐藏黑名单表单并显示浏览历史
-            document.getElementById('blacklist-div').style.display = 'none';
-            document.getElementById('homepage-title').style.display = 'none';
-            document.getElementById('history-div').style.display = 'block';
-            document.getElementById('error-message').style.display = 'none';
-        } else if (xhr.readyState === 4) {
-            console.log('请求失败');
-
-            // 解析服务器返回的错误JSON
-            const response = JSON.parse(xhr.responseText);
-            const errorMessage = response.error; // 注意这里从返回的数据中提取 error 字段
-
-            // 将错误信息设置为错误提示<div>的文本，并将<div>显示出来
-            const errorMessageDiv = document.getElementById('error-message');
-            errorMessageDiv.textContent = errorMessage;
-            errorMessageDiv.style.display = 'block';
-
-            // 这里隐藏表头和表格内容
-            document.querySelector('#history-table thead').style.display = 'none';
-            document.querySelector('#history-table tbody').style.display = 'none';
-
-
-            document.getElementById('error-message').style.display = 'block';
-            document.getElementById('history-div').style.display = 'none';
-        }
-    };
+// 获取黑名单
+function fetchBlacklist() {
+    fetch('http://localhost:8080/blacklist')
+        .then(response => response.json())
+        .then(data => {
+            var table = document.getElementById('blacklist-table');
+            table.innerHTML = '';
+            data.forEach(item => {
+                var row = document.createElement('div');
+                row.className = 'table-row';
+                var urlDiv = document.createElement('div');
+                urlDiv.textContent = item;
+                var buttonDiv = document.createElement('div');
+                var deleteButton = document.createElement('button');
+                deleteButton.textContent = '删除';
+                deleteButton.addEventListener('click', function() {
+                    manageBlacklist('delete', item);
+                });
+                buttonDiv.appendChild(deleteButton);
+                row.appendChild(urlDiv);
+                row.appendChild(buttonDiv);
+                table.appendChild(row);
+            });
+        });
 }
 
-// 实现 convertTime 函数，将微秒时间戳转换为易读的日期时间格式
-function convertTime(microseconds) {
-    // Edge 浏览器的时间戳是以微秒为单位的，从 1601 年 1 月 1 日开始
-    // 我们需要将这个时间戳转换为以毫秒为单位的，从 1970 年 1 月 1 日开始
-    const timestamp = (microseconds - 11644473600000000) / 1000;
-    const date = new Date(timestamp);
-    return date.toLocaleString(); // 返回本地格式的日期时间字符串
+// 获取告警历史
+// 获取告警历史
+function fetchAlerts() {
+    fetch('http://localhost:8080/alerts')
+        .then(response => response.json())
+        .then(data => {
+            var table = document.getElementById('alerts-table');
+            table.innerHTML = '';
+            data.forEach(item => {
+                var row = document.createElement('div');
+                row.className = 'table-row';
+
+                var clientIdDiv = document.createElement('div');
+                clientIdDiv.textContent = item.client_id;
+                row.appendChild(clientIdDiv);
+
+                var nameDiv = document.createElement('div');
+                nameDiv.textContent = item.name;
+                row.appendChild(nameDiv);
+
+                var urlDiv = document.createElement('div');
+                urlDiv.textContent = item.url;
+                row.appendChild(urlDiv);
+
+                var viewCountDiv = document.createElement('div');
+                viewCountDiv.textContent = item.view_count;
+                row.appendChild(viewCountDiv);
+
+                var timeDiv = document.createElement('div');
+                timeDiv.textContent = new Date(item.visit_time).toLocaleString();
+                row.appendChild(timeDiv);
+
+                table.appendChild(row);
+            });
+        });
 }
+
+
+// 管理黑名单
+function manageBlacklist(action, url) {
+    fetch('http://localhost:8080/blacklist', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ action, url })
+    })
+        .then(() => {
+            fetchBlacklist();
+        });
+}
+
+// 初始加载黑名单页面
+fetchBlacklist();
