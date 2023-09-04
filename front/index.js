@@ -2,12 +2,19 @@
 document.getElementById('blacklist-button').addEventListener('click', function() {
     document.getElementById('blacklist').classList.remove('hidden');
     document.getElementById('alerts').classList.add('hidden');
+    document.getElementById('home').classList.add('hidden');
     fetchBlacklist();
 });
 document.getElementById('alerts-button').addEventListener('click', function() {
     document.getElementById('alerts').classList.remove('hidden');
     document.getElementById('blacklist').classList.add('hidden');
+    document.getElementById('home').classList.add('hidden');
     fetchAlerts();
+});
+document.getElementById('home-button').addEventListener('click', function() {
+    document.getElementById('home').classList.remove('hidden');
+    document.getElementById('blacklist').classList.add('hidden');
+    document.getElementById('alerts').classList.add('hidden');
 });
 
 // 添加新的黑名单项
@@ -27,24 +34,36 @@ function fetchBlacklist() {
             table.innerHTML = '';
             data.forEach(item => {
                 var row = document.createElement('div');
-                row.className = 'table-row';
-                var urlDiv = document.createElement('div');
-                urlDiv.textContent = item;
-                var buttonDiv = document.createElement('div');
+                row.classList.add('input-group', 'mb-3');
+
+                var urlInput = document.createElement('input');
+                urlInput.type = 'text';
+                urlInput.value = item;
+                urlInput.classList.add('form-control');
+                urlInput.readOnly = true;
+                row.appendChild(urlInput);
+
+                var deleteButtonContainer = document.createElement('div');
+                deleteButtonContainer.classList.add('input-group-append');
+
                 var deleteButton = document.createElement('button');
                 deleteButton.textContent = '删除';
+                deleteButton.id = 'delete-button';
+                deleteButton.classList.add('btn', 'btn-outline-secondary');
                 deleteButton.addEventListener('click', function() {
                     manageBlacklist('delete', item);
                 });
-                buttonDiv.appendChild(deleteButton);
-                row.appendChild(urlDiv);
-                row.appendChild(buttonDiv);
+                deleteButtonContainer.appendChild(deleteButton);
+
+                row.appendChild(deleteButtonContainer);
                 table.appendChild(row);
             });
         });
 }
 
-// 获取告警历史
+
+
+
 // 获取告警历史
 function fetchAlerts() {
     fetch('http://localhost:8080/alerts')
@@ -53,28 +72,27 @@ function fetchAlerts() {
             var table = document.getElementById('alerts-table');
             table.innerHTML = '';
             data.forEach(item => {
-                var row = document.createElement('div');
-                row.className = 'table-row';
+                var row = document.createElement('tr');
 
-                var clientIdDiv = document.createElement('div');
-                clientIdDiv.textContent = item.client_id;
-                row.appendChild(clientIdDiv);
+                var clientIdCell = document.createElement('td');
+                clientIdCell.textContent = item.client_id;
+                row.appendChild(clientIdCell);
 
-                var nameDiv = document.createElement('div');
-                nameDiv.textContent = item.name;
-                row.appendChild(nameDiv);
+                var nameCell = document.createElement('td');
+                nameCell.textContent = item.name;
+                row.appendChild(nameCell);
 
-                var urlDiv = document.createElement('div');
-                urlDiv.textContent = item.url;
-                row.appendChild(urlDiv);
+                var urlCell = document.createElement('td');
+                urlCell.textContent = item.url;
+                row.appendChild(urlCell);
 
-                var viewCountDiv = document.createElement('div');
-                viewCountDiv.textContent = item.view_count;
-                row.appendChild(viewCountDiv);
+                var viewCountCell = document.createElement('td');
+                viewCountCell.textContent = item.view_count;
+                row.appendChild(viewCountCell);
 
-                var timeDiv = document.createElement('div');
-                timeDiv.textContent = new Date(item.visit_time).toLocaleString();
-                row.appendChild(timeDiv);
+                var timeCell = document.createElement('td');
+                timeCell.textContent = new Date(item.view_timestamp).toLocaleString();
+                row.appendChild(timeCell);
 
                 table.appendChild(row);
             });

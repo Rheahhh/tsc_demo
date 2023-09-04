@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"tsc_demo/backend/models"
 
@@ -22,6 +23,7 @@ func NewBlacklistController(m models.BlacklistManager) *BlacklistController {
 }
 
 func (c *BlacklistController) GetBlacklist(g *gin.Context) {
+	fmt.Println("Received GET /blacklist request")
 	blacklist, err := c.manager.GetBlacklist()
 	if err != nil {
 		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

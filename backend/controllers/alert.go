@@ -2,19 +2,10 @@ package controllers
 
 import (
 	"net/http"
-	"time"
 	"tsc_demo/backend/models"
 
 	"github.com/gin-gonic/gin"
 )
-
-type BrowserHistoryInput struct {
-	ClientID  string    `json:"client_id"`
-	Name      string    `json:"name"`
-	URL       string    `json:"url"`
-	ViewCount int       `json:"view_count"`
-	VisitTime time.Time `json:"visit_time"`
-}
 
 type AlertController struct {
 	manager models.AlertManager
@@ -34,16 +25,17 @@ func (c *AlertController) GetAlerts(g *gin.Context) {
 }
 
 func (c *AlertController) ReceiveBrowserHistory(g *gin.Context) {
-	var browserHistoryInput BrowserHistoryInput
-	if err := g.ShouldBindJSON(&browserHistoryInput); err != nil {
+	var browserHistoryInputs models.BrowserHistoryInputs
+	if err := g.ShouldBindJSON(&browserHistoryInputs); err != nil {
 		g.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	err := c.manager.ReceiveBrowserHistory(browserHistoryInput.ClientID, browserHistoryInput.Name, browserHistoryInput.URL, browserHistoryInput.ViewCount, browserHistoryInput.VisitTime)
+	err := c.manager.ReceiveBrowserHistory(browserHistoryInputs)
 	if err != nil {
 		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	g.JSON(http.StatusOK, gin.H{"status": "success"})
 }
